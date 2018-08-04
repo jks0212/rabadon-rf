@@ -55,7 +55,6 @@
 #define CMD_CONTROL           0x6E
 #define CMD_BUFF_LEN          5
 #define GREEN_LED_PIN         8
-#define ONBOARD_LED           (13) //check if nothing is using this port
 #define CONTROL_VALUE_THRESHOLD   40
 #define POWER_VALUE_THRESHOLD     100
 
@@ -169,21 +168,11 @@ bool print_sensors = true;
 
 
 void setup() {
-  Serial.begin(9600); //Try to increase speed later
-  pinMode(GREEN_LED_PIN, OUTPUT);
-  pinMode(ONBOARD_LED, OUTPUT);
-
-  for(int k = 0; k<5; k++){ //this is to know if your board is booting
-    delay(100);
-    digitalWrite(ONBOARD_LED, HIGH);
-    delay(100);
-    digitalWrite(ONBOARD_LED, LOW);    
-  }
+  Serial.begin(9600);
 
   printf_begin();
 
-  
-  
+  pinMode(GREEN_LED_PIN, OUTPUT);
 
    // Setup and configure rf radio
   radio.begin();
@@ -799,7 +788,6 @@ double tempAmender(double coef[], short data, double temp){
 }
 
 void read_mpu_6050_data(){                                             //Subroutine for reading the raw gyro and accelerometer data
-  digitalWrite(ONBOARD_LED,HIGH);
   Wire.beginTransmission(0x68);                                        //Start communicating with the MPU-6050
 //  Wire.beginTransmission(gyro_address);                                        //Start communicating with the MPU-6050
   Wire.write(0x3B);                                                    //Send the requested starting register
@@ -814,11 +802,9 @@ void read_mpu_6050_data(){                                             //Subrout
   gyro_x = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_x variable
   gyro_y = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_y variable
   gyro_z = Wire.read()<<8|Wire.read();                                 //Add the low and high byte to the gyro_z variable
-  digitalWrite(ONBOARD_LED,LOW);
 }
 
 void setup_mpu_6050_registers(){
-  digitalWrite(ONBOARD_LED,HIGH);
   //Activate the MPU-6050
   Wire.beginTransmission(0x68);                                        //Start communicating with the MPU-6050
   Wire.write(0x6B);                                                    //Send the requested starting register
@@ -846,13 +832,13 @@ void setup_mpu_6050_registers(){
   Wire.write(0x1A);                                                          //We want to write to the CONFIG register (1A hex)
   Wire.write(0x03);                                                          //Set the register bits as 00000011 (Set Digital Low Pass Filter to ~43Hz)
   Wire.endTransmission();                                                    //End the transmission with the gyro    
- digitalWrite(ONBOARD_LED,LOW);
+ 
 }
 
 
 void set_gyro_registers(){
   //Setup the MPU-6050
-digitalWrite(ONBOARD_LED,HIGH);
+
     Wire.beginTransmission(gyro_address);                                      //Start communication with the address found during search.
     Wire.write(0x6B);                                                          //We want to write to the PWR_MGMT_1 register (6B hex)
     Wire.write(0x00);                                                          //Set the register bits as 00000000 to activate the gyro
@@ -884,7 +870,7 @@ digitalWrite(ONBOARD_LED,HIGH);
     Wire.write(0x1A);                                                          //We want to write to the CONFIG register (1A hex)
     Wire.write(0x03);                                                          //Set the register bits as 00000011 (Set Digital Low Pass Filter to ~43Hz)
     Wire.endTransmission();                                                    //End the transmission with the gyro    
- digitalWrite(ONBOARD_LED,LOW);
+ 
 }
 
 
@@ -905,5 +891,23 @@ char* readCodeData(){
   }
   buf[i] = '\0';
   return buf;
+}
+*/
+
+
+/*
+String readCodeData(){
+  String code_data = "";
+  if(Serial.available() > 0){
+    char read_ch;
+    while(true){
+      read_ch = Serial.read();
+      if(read_ch == NULL || read_ch == 10) break;
+      if(read_ch > 0 && read_ch < 128){
+        code_data.concat(read_ch);
+      }
+    }
+  }
+  return code_data;
 }
 */
